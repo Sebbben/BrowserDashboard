@@ -3,10 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>New tab</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css')}}">
+    <script src="{{ url_for('static', filename='main.js') }}"></script>
+    <script src="{{ url_for('static', filename='testTile.js') }}"></script>
 </head>
 <body>
-    <script src="{{ url_for('static', filename='main.js') }}"></script>
-    <my-tag></my-tag>
+    <background-image></background-image>
+    <dashboard-wrapper></dashboard-wrapper>
 </body>
 </html>

@@ -1,12 +1,149 @@
-class MyTag extends HTMLElement {
+class Background extends HTMLElement {
     constructor() {
-        super();
+        super()
     }
 
     connectedCallback() {
-        console.log("My first custom tag!")
-        this.innerText = "Hello from my new tag!"
+        const shadow = this.attachShadow({"mode": "open"})
+
+        const backgroundImage = document.createElement("img")
+
+        backgroundImage.src = "/static/bg.jpg"
+        
+        const style = document.createElement("style")
+
+        style.textContent = `
+        img {
+            height: 100vh;
+            filter: blur(0px);
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+        `
+
+        shadow.appendChild(style)
+        shadow.appendChild(backgroundImage)
     }
 }
 
-customElements.define("my-tag", MyTag)
+class Dashboard extends HTMLElement {
+    constructor() {
+        super()
+
+        this.gridX = 10
+        this.gridY = 10
+        this.content = [
+            {
+                name: "Test",
+                type: "test-tile",
+                x0: 4,
+                x1: 7,
+                y0: 5,
+                y1: 8
+            }
+        ]
+    }
+
+    connectedCallback() {
+        const shadow = this.attachShadow({"mode": "open"})
+        const container = document.createElement("div")
+        container.setAttribute("class", "container")
+        
+        for (const tile of this.content) {
+            const elm = document.createElement("dashboard-tile")
+            elm.setAttribute("x0", tile.x0);
+            elm.setAttribute("x1", tile.x1);
+            elm.setAttribute("y0", tile.y0);
+            elm.setAttribute("y1", tile.y1);
+            elm.setAttribute("type", tile.type)
+
+            container.appendChild(elm)
+        }
+
+        const styles = document.createElement("style")
+        styles.textContent = `
+        .container {
+            width: 100%;
+            height: 100%;
+            display: grid;
+            grid-template-columns: repeat(${this.gridX}, 1fr);
+            grid-template-rows: repeat(${this.gridY}, 1fr);
+            column-gap: 10px;
+            row-gap: 15px;
+        }
+        `
+        shadow.appendChild(styles)
+        shadow.appendChild(container)
+
+    }
+}
+
+class DashboardTile extends HTMLElement {
+    constructor() {
+        super() 
+    }
+
+    getId() {
+        return [
+            "dashboard-tile", 
+            this.getAttribute("x0"), 
+            this.getAttribute("x1"), 
+            this.getAttribute("y0"), 
+            this.getAttribute("y1")
+        ].join("-")
+    }
+
+    connectedCallback() {
+        this.setAttribute("id", this.getId())
+        const shadow = this.attachShadow({"mode": "closed"})
+
+        const container = document.createElement("div")
+        container.setAttribute("class", "container")
+
+        let content;
+        if (this.getAttribute("type"))
+            content = document.createElement(this.getAttribute("type"))
+        else
+            console.log("Could not create element of type" + this.getAttribute("type"))
+
+        if (content)
+            container.appendChild(content);
+
+        const styles = document.createElement("style")
+
+        styles.textContent = `
+        .container {
+            height: 100%;
+            width: 100%;
+            background: #ccc;
+            opacity: 0.2;
+            backdrop-filter: blur(5px);
+            border-radius: 10px;
+        }
+        `
+
+        shadow.appendChild(styles)
+        shadow.appendChild(container)
+
+        this.updateParentStyles()
+
+    }
+
+    updateParentStyles() {
+        const shadow = this.getRootNode()
+        shadow.querySelector("style").textContent += `
+        #${this.getId()} {
+            grid-row-start: ${this.getAttribute("y0")};
+            grid-row-end: ${this.getAttribute("y1")};
+            grid-column-start: ${this.getAttribute("x0")};
+            grid-column-end: ${this.getAttribute("x1")};
+
+        }
+        `
+    }
+
+}
+customElements.define("background-image", Background)
+customElements.define("dashboard-wrapper", Dashboard)
+customElements.define("dashboard-tile", DashboardTile)
