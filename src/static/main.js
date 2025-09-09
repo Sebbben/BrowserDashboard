@@ -37,10 +37,18 @@ class Dashboard extends HTMLElement {
             {
                 name: "Test",
                 type: "test-tile",
-                x0: 4,
-                x1: 7,
-                y0: 5,
-                y1: 8
+                x0: 9,
+                x1: 11,
+                y0: 1,
+                y1: 2
+            },
+            {
+                name: "Test",
+                type: "test-tile",
+                x0: 1,
+                x1: 3,
+                y0: 1,
+                y1: 2
             }
         ]
     }
@@ -114,12 +122,14 @@ class DashboardTile extends HTMLElement {
 
         styles.textContent = `
         .container {
+            display: grid;
             height: 100%;
             width: 100%;
-            background: #ccc;
-            opacity: 0.2;
+            background: rgba(200,200,200,0.2);
             backdrop-filter: blur(5px);
             border-radius: 10px;
+            text-align: center;
+            vertical-align: center;
         }
         `
 
