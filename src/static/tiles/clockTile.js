@@ -32,4 +32,4 @@ class TestTile extends HTMLElement {
 
 }
 
-customElements.define("test-tile", TestTile)
+customElements.define("clock-tile", TestTile)

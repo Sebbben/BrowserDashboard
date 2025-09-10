@@ -36,7 +36,7 @@ class Dashboard extends HTMLElement {
         this.content = [
             {
                 name: "Test",
-                type: "test-tile",
+                type: "clock-tile",
                 x0: 9,
                 x1: 11,
                 y0: 1,
@@ -44,11 +44,19 @@ class Dashboard extends HTMLElement {
             },
             {
                 name: "Test",
-                type: "test-tile",
+                type: "clock-tile",
                 x0: 1,
                 x1: 3,
                 y0: 1,
                 y1: 2
+            },
+            {
+                name: "Test",
+                type: "favorites-tile",
+                x0: 4,
+                x1: 8,
+                y0: 4,
+                y1: 8
             }
         ]
     }
