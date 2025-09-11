@@ -14,7 +14,9 @@ class Background extends HTMLElement {
 
         style.textContent = `
         img {
-            height: 100vh;
+            object-fit: cover;
+            height: 100%;
+            width: 100%;
             filter: blur(0px);
             position: absolute;
             left: 0;
