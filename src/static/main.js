@@ -164,6 +164,98 @@ class DashboardTile extends HTMLElement {
     }
 
 }
+
+class Modal extends HTMLElement {
+    constructor() {
+        super()
+    }
+
+    connectedCallback() {
+        this.shadow = this.attachShadow({mode: "open"})
+        this.container = document.createElement("div")
+        this.container.classList.add("container")
+
+        const styles = document.createElement("style");
+        styles.textContent = `
+            .container {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                height: auto;
+                min-height: 30%;
+                width: auto;
+                min-width: 50%;
+                background: rgba(200, 200, 200, 0.5);
+                padding: 20px;
+                border-radius: 10px;
+            }
+
+            .content-container {
+                position: relative;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+            }
+
+            .close-button {
+                display: grid;
+                position: fixed;
+                right: 3%;
+                top: 3%;
+                font-size: 2rem;
+                font-weight: bold;
+                font-family: 'Arial';
+                width: 3rem;
+                height: 3rem;
+                border-radius: 3rem;
+                background: #fff;
+                align-items: center;
+                justify-items: center;
+                z-index: 10;
+            }
+
+            .close-button:hover {
+                filter: blur(5px);
+                cursor: crosshair;
+            }   
+
+            .close-button > p {
+                margin: 0;
+                padding: 0;
+            }
+        `
+
+        const closeButton = document.createElement("div")
+        closeButton.innerHTML = "<p>X</p>"
+        closeButton.classList.add("close-button")
+        closeButton.addEventListener("click", (e) => {e.preventDefault; this.hide()})
+        this.container.appendChild(closeButton)
+
+        this.contentContainer = document.createElement("div")
+        this.contentContainer.classList.add("content-container")
+        this.container.appendChild(this.contentContainer)
+
+        this.shadow.appendChild(styles)
+    }
+
+    show() {
+        this.shadow.appendChild(this.container)
+    }
+
+    hide() {
+        this.shadow.removeChild(this.container)
+    }
+
+    setContent(content) {
+        this.contentContainer.innerHTML = ""
+        this.contentContainer.appendChild(content)
+    }
+
+}
+
 customElements.define("background-image", Background)
 customElements.define("dashboard-wrapper", Dashboard)
 customElements.define("dashboard-tile", DashboardTile)
+customElements.define("custom-modal", Modal)
