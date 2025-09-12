@@ -1,37 +1,101 @@
 class Favorites extends HTMLElement {
     constructor() {
         super()
+        this.db;
+    }
+
+    addFavsLinks() {
+        // return {
+        //     "IN1000": {type: "link", url: "https://www.uio.no/studier/emner/matnat/ifi/IN1000/h25/index.html"},
+        //     "Mine Studier": {type: "link", url: "https://minestudier.no/en/student"},
+        //     "Devilry": {type: "link", url: "https://devilry.ifi.uio.no/"}   
+        // }
+        
+        const transaction = this.db.transaction("favorites", "readonly")
+
+        const favsObjStr = transaction.objectStore("favorites");
+        const cur = favsObjStr.openCursor()
+
+        cur.onsuccess = (event) => {
+            const cursor = event.target.result;
+            if (!cursor) return;
+            const {text, type, url} = cursor.value;
+            
+            this.addFavLink({id: cursor.key, text: text, type: type, url: url})
+            cursor.continue();
+        }
+
+        cur.onerror = () => {
+            console.log("Error when getting favorites")
+        }
+
+    }
+
+    addFavLink(fav) {
+        if (fav.type != "link") return;
+
+        const linkContainer = document.createElement("div")
+        const linkText = document.createElement("p")
+        linkText.innerText = fav.text
+        linkContainer.appendChild(linkText)
+        linkContainer.setAttribute("class", "link-container")
+        linkContainer.addEventListener("click", (e) => {
+            e.preventDefault()
+
+            if (e.getModifierState("Control")) {
+                console.log(e.target);
+                return;
+            }
+
+            window.location = fav.url
+        })
+
+        this.container.appendChild(linkContainer)
+        
+    }
+
+    addAddButton() {
+        const addButton = document.createElement("div")
+        const buttonText = document.createElement("p")
+        buttonText.innerText = "+"
+        addButton.appendChild(buttonText)
+        addButton.classList.add("link-container")
+        addButton.addEventListener("click", () => {
+            this.createFavorite()
+        })
+        this.container.appendChild(addButton)
+    }
+
+    createFavorite() {
+        while (this.db === undefined) {
+            setTimeout(()=>{}, 500)
+        }
+
+        const transaction = this.db.transaction("favorites", "readwrite")
+
+        const favsObjStr = transaction.objectStore("favorites");
+
+        console.log("hello")
+        const req = favsObjStr.add({text: "test", type: "link", url: "test"})
+        req.onsuccess = (e) => {
+            this.refreshFavs()
+        }
+    }
+
+    refreshFavs() {
+        this.container.innerHTML = "";
+        this.addAddButton()
+        this.addFavsLinks()
     }
 
     connectedCallback() {
 
-        const shadow = this.attachShadow({mode: "closed"})
-
-        const favsTree = {
-            "IN1000": {type: "link", url: "https://www.uio.no/studier/emner/matnat/ifi/IN1000/h25/index.html"},
-            "Mine Studier": {type: "link", url: "https://minestudier.no/en/student"},
-            "Devilry": {type: "link", url: "https://devilry.ifi.uio.no/"}
-            
-        }
-
-        const container = document.createElement("div")
-        container.classList.add("container")
+        this.shadow = this.attachShadow({mode: "closed"})
+        this.container = document.createElement("div")
+        this.container.classList.add("container")
         
-        for (const [fav, info] of Object.entries(favsTree)) {
-            if (info.type != "link") continue;
+        
 
-            const linkContainer = document.createElement("div")
-            const linkText = document.createElement("p")
-            linkText.innerText = fav
-            linkContainer.appendChild(linkText)
-            linkContainer.setAttribute("class", "link-container")
-            linkContainer.addEventListener("click", (e) => {
-                window.location = info.url
-            })
-
-            container.appendChild(linkContainer)
-            
-        }
 
         const styles = document.createElement("style")
         
@@ -69,10 +133,26 @@ class Favorites extends HTMLElement {
         }
         `
 
-        // const root = this.getRootNode()
-        // root.querySelector("style").textContent += styles
-        shadow.appendChild(styles)
-        shadow.appendChild(container)
+        this.addAddButton()
+        this.shadow.appendChild(styles)
+        this.shadow.appendChild(this.container)
+
+        this.handleOpenDB()
+
+    }
+
+    handleOpenDB() {
+        const request = window.indexedDB.open("favorites", 1)
+
+        request.onsuccess = (event) => {
+            this.db = event.target.result;
+            this.addFavsLinks()
+        }
+
+        request.onupgradeneeded = (event) => {
+            this.db = event.target.result;
+            const objectStore = this.db.createObjectStore('favorites', { autoIncrement: true });
+        }
     }
 }
 
