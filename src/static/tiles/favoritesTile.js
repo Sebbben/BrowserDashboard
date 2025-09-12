@@ -4,13 +4,8 @@ class Favorites extends HTMLElement {
         this.db;
     }
 
-    addFavsLinks() {
-        // return {
-        //     "IN1000": {type: "link", url: "https://www.uio.no/studier/emner/matnat/ifi/IN1000/h25/index.html"},
-        //     "Mine Studier": {type: "link", url: "https://minestudier.no/en/student"},
-        //     "Devilry": {type: "link", url: "https://devilry.ifi.uio.no/"}   
-        // }
-        
+    populateGrid() {
+
         const transaction = this.db.transaction("favorites", "readonly")
 
         const favsObjStr = transaction.objectStore("favorites");
@@ -21,7 +16,7 @@ class Favorites extends HTMLElement {
             if (!cursor) return;
             const {text, type, url} = cursor.value;
             
-            this.addFavLink({id: cursor.key, text: text, type: type, url: url})
+            this.insertItem({id: cursor.key, text: text, type: type, url: url})
             cursor.continue();
         }
 
@@ -31,12 +26,12 @@ class Favorites extends HTMLElement {
 
     }
 
-    addFavLink(fav) {
-        if (fav.type != "link") return;
+    insertItem(item) {
+        if (item.type != "link") return;
 
         const linkContainer = document.createElement("div")
         const linkText = document.createElement("p")
-        linkText.innerText = fav.text
+        linkText.innerText = item.text
         linkContainer.appendChild(linkText)
         linkContainer.setAttribute("class", "link-container")
         linkContainer.addEventListener("click", (e) => {
@@ -47,45 +42,94 @@ class Favorites extends HTMLElement {
                 return;
             }
 
-            window.location = fav.url
+            window.location = item.url
         })
 
         this.container.appendChild(linkContainer)
         
     }
 
-    addAddButton() {
+    insertAddButton() {
         const addButton = document.createElement("div")
         const buttonText = document.createElement("p")
         buttonText.innerText = "+"
         addButton.appendChild(buttonText)
         addButton.classList.add("link-container")
         addButton.addEventListener("click", () => {
-            this.createFavorite()
+            this.createNewFavorite()
         })
         this.container.appendChild(addButton)
     }
 
-    createFavorite() {
-        while (this.db === undefined) {
-            setTimeout(()=>{}, 500)
-        }
-
+    createNewFavorite() {
         const transaction = this.db.transaction("favorites", "readwrite")
 
         const favsObjStr = transaction.objectStore("favorites");
 
-        console.log("hello")
         const req = favsObjStr.add({text: "test", type: "link", url: "test"})
         req.onsuccess = (e) => {
-            this.refreshFavs()
+            this.refreshGrid()
         }
     }
 
-    refreshFavs() {
+    refreshGrid() {
         this.container.innerHTML = "";
-        this.addAddButton()
-        this.addFavsLinks()
+        this.insertAddButton()
+        this.populateGrid()
+    }
+
+    insertStyles() {
+        const styles = document.createElement("style")
+        
+        styles.textContent = `
+            .container {
+                height: 100%;
+                width: 100%;
+                display: grid;
+                grid-auto-flow: column;
+                grid-template-rows: repeat(3, 1fr);
+        
+                align-items: center;
+            }
+        
+            .link-container {
+                height: 50px;
+                width: 70px;
+                display: grid;
+                justify-self: center;
+                align-items: center;
+                text-align: center;
+                background: rgba(200, 200, 200, 0.5);
+                padding: 10px;
+                border-radius: 10px;
+            }
+        
+            .link-container:hover {
+                background: rgba(200,200,200,0.2);
+                filter: blur(2px);
+                cursor: crosshair; 
+            }
+            
+            p {
+                margin: 0;
+                padding; 0;
+            }
+        `
+        this.shadow.appendChild(styles)
+    }
+    
+    handleOpenDB() {
+        const request = window.indexedDB.open("favorites", 1)
+
+        request.onsuccess = (event) => {
+            this.db = event.target.result;
+            this.populateGrid()
+        }
+
+        request.onupgradeneeded = (event) => {
+            this.db = event.target.result;
+            const objectStore = this.db.createObjectStore('favorites', { autoIncrement: true });
+        }
     }
 
     connectedCallback() {
@@ -94,66 +138,14 @@ class Favorites extends HTMLElement {
         this.container = document.createElement("div")
         this.container.classList.add("container")
         
+        this.insertStyles()
+        this.insertAddButton()
         
-
-
-        const styles = document.createElement("style")
-        
-        styles.textContent = `
-        .container {
-            height: 100%;
-            width: 100%;
-            display: grid;
-            grid-template-rows: auto;
-            grid-template-columns: auto;
-            align-items: center;
-        }
-
-        .link-container {
-            height: 50px;
-            width: 70px;
-            display: grid;
-            justify-self: center;
-            align-items: center;
-            text-align: center;
-            background: rgba(200, 200, 200, 0.5);
-            padding: 10px;
-            border-radius: 10px;
-        }
-
-        .link-container:hover {
-            background: rgba(200,200,200,0.2);
-            filter: blur(2px);
-            cursor: crosshair; 
-        }
-        
-        p {
-            margin: 0;
-            padding; 0;
-        }
-        `
-
-        this.addAddButton()
-        this.shadow.appendChild(styles)
-        this.shadow.appendChild(this.container)
-
         this.handleOpenDB()
-
+        
+        this.shadow.appendChild(this.container)
     }
 
-    handleOpenDB() {
-        const request = window.indexedDB.open("favorites", 1)
-
-        request.onsuccess = (event) => {
-            this.db = event.target.result;
-            this.addFavsLinks()
-        }
-
-        request.onupgradeneeded = (event) => {
-            this.db = event.target.result;
-            const objectStore = this.db.createObjectStore('favorites', { autoIncrement: true });
-        }
-    }
 }
 
 customElements.define("favorites-tile", Favorites)
