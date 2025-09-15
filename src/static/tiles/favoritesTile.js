@@ -98,26 +98,30 @@ class Favorites extends HTMLElement {
 			}
 		
 			.link-container {
-				height: 50px;
-				width: 70px;
+				height: 100px;
+				width: 300px;
 				display: grid;
 				justify-self: center;
 				align-items: center;
 				text-align: center;
-				background: rgba(200, 200, 200, 0.5);
+				background: rgba(50, 250, 200, 0.3);
 				padding: 10px;
 				border-radius: 10px;
 			}
 		
 			.link-container:hover {
-				background: rgba(200,200,200,0.2);
-				filter: blur(2px);
+				background: rgba(0, 200, 150, 0.3);
+				filter: blur(0px);
 				cursor: crosshair; 
 			}
 			
 			p {
 				margin: 0;
 				padding; 0;
+				font-size: 2rem;
+				font-weight: 200;
+				font-family: arial;
+				color: white;
 			}
 		`
 		this.shadow.appendChild(styles)
@@ -161,7 +165,9 @@ class Favorites extends HTMLElement {
 		const modal = document.querySelector("custom-modal")
 		const item = this.items[itemId]
 
-		const content = document.createElement("div")
+		const content = document.createElement("custom-modal-content")
+		const container = document.createElement("div")
+		container.classList.add("container")
 
 		const textInput = document.createElement("input")
 		textInput.type = "text"
@@ -186,11 +192,22 @@ class Favorites extends HTMLElement {
 			e.preventDefault()
 			this.removeFavorite(itemId)
 		})
+
+		const styles = document.createElement("style")
+		styles.textContent = `
+			.container {
+				width: 100%;
+				height: 100%;
+			}
+		`
+
+		container.appendChild(textInput)
+		container.appendChild(urlInput)
+		container.appendChild(save)
+		container.appendChild(deleteButton)
 		
-		content.appendChild(textInput)
-		content.appendChild(urlInput)
-		content.appendChild(save)
-		content.appendChild(deleteButton)
+		content.appendChild(styles)
+		content.appendChild(container)
 
 
 		modal.setContent(content)

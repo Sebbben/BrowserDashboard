@@ -8,7 +8,7 @@ class Background extends HTMLElement {
 
         const backgroundImage = document.createElement("img")
 
-        backgroundImage.src = "/static/bg.jpg"
+        backgroundImage.src = "/static/backgrounds/sheep.jpg"
         
         const style = document.createElement("style")
 
@@ -135,8 +135,8 @@ class DashboardTile extends HTMLElement {
             display: grid;
             height: 100%;
             width: 100%;
-            background: rgba(200,200,200,0.2);
-            backdrop-filter: blur(5px);
+            background: rgba(50,150,100,0.4);
+            backdrop-filter: blur(7px);
             border-radius: 10px;
             text-align: center;
             vertical-align: center;
@@ -225,6 +225,11 @@ class Modal extends HTMLElement {
                 margin: 0;
                 padding: 0;
             }
+
+            custom-modal-content {
+                width: 100%;
+                height: 100%;
+            }
         `
 
         const closeButton = document.createElement("div")
@@ -252,10 +257,24 @@ class Modal extends HTMLElement {
         this.contentContainer.innerHTML = ""
         this.contentContainer.appendChild(content)
     }
+}
 
+class ModalContent extends HTMLElement {
+    constructor() {
+        super()
+        this.shadow = this.attachShadow({mode: "closed"})
+    }
+
+    connectedCallback() {
+    }
+
+    appendChild(child) {
+        this.shadow.appendChild(child)
+    }
 }
 
 customElements.define("background-image", Background)
 customElements.define("dashboard-wrapper", Dashboard)
 customElements.define("dashboard-tile", DashboardTile)
 customElements.define("custom-modal", Modal)
+customElements.define("custom-modal-content", ModalContent)
