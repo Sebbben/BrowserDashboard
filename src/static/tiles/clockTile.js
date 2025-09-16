@@ -1,11 +1,11 @@
-class TestTile extends HTMLElement {
+class ClockTile extends HTMLElement {
     constructor() {
         super()
     }
 
     getTimeString() {
         let time = new Date()
-        return `${time.getHours()}:${time.getMinutes()}:${time.getSeconds()}`
+        return `${time.getHours().toString().padStart(2, "0")}:${time.getMinutes().toString().padStart(2, "0")}:${time.getSeconds().toString().padStart(2, "0")}`
     }
 
     connectedCallback() {
@@ -32,4 +32,4 @@ class TestTile extends HTMLElement {
 
 }
 
-customElements.define("clock-tile", TestTile)
+customElements.define("clock-tile", ClockTile)

@@ -46,7 +46,7 @@ class Dashboard extends HTMLElement {
             },
             {
                 name: "Test",
-                type: "clock-tile",
+                type: "time-to-next-date",
                 x0: 1,
                 x1: 3,
                 y0: 1,
